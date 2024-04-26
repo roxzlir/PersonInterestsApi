@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using PersonInterestsApi.Data;
 using PersonInterestsApi.Models;
+using System;
 using System.Linq;
 
 namespace PersonInterestsApi
@@ -37,7 +38,11 @@ namespace PersonInterestsApi
             app.UseAuthorization();
 
             //--------------------------- PERSON ------------------------------------------------------------
-            // GET ALL PERSONS
+
+            //---------------------------------------------------------------------------------------
+            //---------------------------------------------------------------------------------------
+            // LABB UPPGIFT 1 Hämta alla personer i systemet
+            //  GET ALL PERSONS
             app.MapGet("/persons", async (AppDbContext context) =>
             {
                 var persons = await context.Persons.ToListAsync();
@@ -48,6 +53,8 @@ namespace PersonInterestsApi
 
                 return Results.Ok(persons);
             });
+            //---------------------------------------------------------------------------------------
+            //---------------------------------------------------------------------------------------
 
             // GET ONE PERSON
             app.MapGet("/persons/{id:int}", async (int id, AppDbContext context) =>
@@ -98,6 +105,10 @@ namespace PersonInterestsApi
                 return Results.Ok(interests);
             });
             // POST A NEW INTEREST
+            //---------------------------------------------------------------------------------------
+            //LABB UPPGIFT Koppla en person till ett nytt intresse
+            //POST PersonInterest
+            //---------------------------------------------------------------------------------------
             app.MapPost("/interest", async (Interest interest, AppDbContext context) =>
             {
                 context.Interests.Add(interest);
@@ -134,6 +145,12 @@ namespace PersonInterestsApi
 
                 return Results.Ok(personInterests);
             });
+
+            //---------------------------------------------------------------------------------------
+            //LABB UPPGIFT Koppla en person till ett nytt intresse
+            //POST PersonInterest
+            //---------------------------------------------------------------------------------------
+
             app.MapPost("/personinterests", async (PersonInterest personInterest, AppDbContext context) =>
             {
                 context.PersonInterests.Add(personInterest);
@@ -196,6 +213,11 @@ namespace PersonInterestsApi
                 return Results.Created($"/link/{link.LinkId}", link);
             });
 
+
+            //---------------------------------------------------------------------------------------
+            //LABB UPPGIFT Lägga in nya länkar för en specifik person och ett specifikt intresse
+            //POST PersonInterest
+            //---------------------------------------------------------------------------------------
             // HÄR får man skapa en ny länk på en redan existeraden person och ett befintligt intresse
             app.MapPost("/person/{personId}/interest/{interestId}/link", async (AddLinkOnExistingPersonModel model, AppDbContext context) =>
             {
@@ -255,7 +277,12 @@ namespace PersonInterestsApi
 
                 return Results.Ok(groupedResult);
             });
+
+
+            //---------------------------------------------------------------------------------------
+            //LABB UPPGIFT Hämta alla intressen som är kopplade till en specifik person
             //GET one person with interests
+            //---------------------------------------------------------------------------------------
             app.MapGet("/person/interests/{id:int}", async (int id, AppDbContext context) =>
             {
 
@@ -276,15 +303,29 @@ namespace PersonInterestsApi
                                      p.PersonPhone,
                                      i.InterestTitle,
                                  };
-
+                    var groupedResult = result.GroupBy(x => x.PersonId)
+                        .Select(grp => new
+                        {
+                            PersonId = grp.Key,
+                            PersonName = grp.First().PersonName,
+                            PersonPhone = grp.First().PersonPhone,
+                            InterestTitle = grp.Select(i => i.InterestTitle).ToList()
+                        });
                     
-                    return Results.Ok(result);
+                    return Results.Ok(groupedResult);
                 }
                 
             });
+            //---------------------------------------------------------------------------------------
+            //---------------------------------------------------------------------------------------
 
-            //Här skapar jag en ny person och ett nytt intresse till den personen på samma gång
 
+
+
+            //---------------------------------------------------------------------------------------
+            //LABB EXTRA Här skapar jag en ny person och ett nytt intresse till den personen på samma gång
+            //
+            //---------------------------------------------------------------------------------------
             app.MapPost("person/interest", async (PersonWithInterestModel model, AppDbContext context) =>
             {
                 using var transaction = context.Database.BeginTransaction();
@@ -351,7 +392,11 @@ namespace PersonInterestsApi
                 return Results.Ok(groupedResult);
             });
 
-            //LABB EXTRA Här får jag ut alla intressen och länkar för endast 1 person baserat på dennas PersonId
+            //---------------------------------------------------------------------------------------
+            //LABB UPPGIFT Ge möjlighet till den som anropar APIet och efterfrågar en person att direkt få ut alla intressen och alla länkar för den personen i en hierarkisk JSON-fil
+            //GET one person with interests and links
+            //---------------------------------------------------------------------------------------
+            //Här får jag ut alla intressen och länkar för endast 1 person baserat på dennas PersonId
             app.MapGet("/interests/links/for/person/{personId}", async (int id, AppDbContext context) =>
             {
                 var result = from p in context.Persons.Where(x => x.PersonId == id)
@@ -382,8 +427,10 @@ namespace PersonInterestsApi
                 return Results.Ok(groupedResult);
             });
 
-
-            //LABB EXTRA Här får man mata in ett personID och får då se alla länkar som den personen har lagt in
+            //---------------------------------------------------------------------------------------
+            //---------------------------------------------------------------------------------------
+            //LABB UPPGIFT Hämta alla länkar som är kopplade till en specifik person
+            //Här får man mata in ett personID och får då se alla länkar som den personen har lagt in
 
             app.MapGet("/all/links/added/by/person/{id:int}", async (int id, AppDbContext context) =>
             {
@@ -411,6 +458,12 @@ namespace PersonInterestsApi
                 }
                 
             });
+            //---------------------------------------------------------------------------------------
+            //---------------------------------------------------------------------------------------
+
+
+            //---------------------------------------------------------------------------------------
+            //---------------------------------------------------------------------------------------
 
             //LABB EXTRA Här får man söka efter ett namn eller bara en bokstav och får då ut alla personer som har det i PersonName sen visas alla deras 
             //intressen och länkar till dem intressena
@@ -444,7 +497,13 @@ namespace PersonInterestsApi
                 
                 return Results.Ok(groupedResult);
             });
+            //---------------------------------------------------------------------------------------
+            //---------------------------------------------------------------------------------------
 
+
+
+            //---------------------------------------------------------------------------------------
+            //---------------------------------------------------------------------------------------
             //LABB EXTRA, Paginering där man får välja hur många resultat man vill skapa för en sida
 
             app.MapGet("/persons/paginate", async (AppDbContext context, int pageSize = 10, int pageNumber = 1) =>
@@ -464,6 +523,10 @@ namespace PersonInterestsApi
 
                 return Results.Ok(pagniantedResult);
             });
+            //---------------------------------------------------------------------------------------
+            //---------------------------------------------------------------------------------------
+
+
 
             //LABB EXTRA, Paginering där man får välja igen men då svaret innehåller fler results för varje person så blir denna lite konstig
 
