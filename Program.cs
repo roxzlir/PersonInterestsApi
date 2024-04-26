@@ -69,7 +69,7 @@ namespace PersonInterestsApi
             });
 
             // POST A NEW PERSON
-            app.MapPost("/person", async (Person person, AppDbContext context) =>
+            app.MapPost("/persons", async (Person person, AppDbContext context) =>
             {
                 context.Persons.Add(person);
                 await context.SaveChangesAsync();
@@ -77,7 +77,7 @@ namespace PersonInterestsApi
             });
 
             // PUT A EXCISTING PERSON
-            app.MapPut("/person/{id:int}", async (int id, Person updatedPerson, AppDbContext context) =>
+            app.MapPut("/persons/{id:int}", async (int id, Person updatedPerson, AppDbContext context) =>
             {
                 var person = await context.Persons.FindAsync(id);
                 if(person == null)
@@ -109,7 +109,7 @@ namespace PersonInterestsApi
             //LABB UPPGIFT Koppla en person till ett nytt intresse
             //POST PersonInterest
             //---------------------------------------------------------------------------------------
-            app.MapPost("/interest", async (Interest interest, AppDbContext context) =>
+            app.MapPost("/interests", async (Interest interest, AppDbContext context) =>
             {
                 context.Interests.Add(interest);
                 await context.SaveChangesAsync();
@@ -117,7 +117,7 @@ namespace PersonInterestsApi
             });
 
             // PUT A EXCISTING INTEREST
-            app.MapPut("/interest/{id:int}", async (int id, Interest updatedInterest, AppDbContext context) =>
+            app.MapPut("/interests/{id:int}", async (int id, Interest updatedInterest, AppDbContext context) =>
             {
                 var interest = await context.Interests.FindAsync(id);
                 if (interest == null)
@@ -186,7 +186,7 @@ namespace PersonInterestsApi
 
             //Här hämtas alla länkar som ligger kopplad till alla intressen som finns
 
-            app.MapGet("/linksOnInterests", async (AppDbContext context) =>
+            app.MapGet("/links/on/interests", async (AppDbContext context) =>
             {
                 var result = from pi in context.PersonInterests
                              join i in context.Interests on pi.FkInterestId equals i.InterestId
@@ -206,7 +206,7 @@ namespace PersonInterestsApi
                 return Results.Ok(groupedResult);
             });
 
-            app.MapPost("/link", async (Link link, AppDbContext context) =>
+            app.MapPost("/links", async (Link link, AppDbContext context) =>
             {
                 context.Links.Add(link);
                 await context.SaveChangesAsync();
@@ -219,7 +219,7 @@ namespace PersonInterestsApi
             //POST PersonInterest
             //---------------------------------------------------------------------------------------
             // HÄR får man skapa en ny länk på en redan existeraden person och ett befintligt intresse
-            app.MapPost("/person/{personId}/interest/{interestId}/link", async (AddLinkOnExistingPersonModel model, AppDbContext context) =>
+            app.MapPost("/persons/{personId}/interests/{interestId}/links", async (AddLinkOnExistingPersonModel model, AppDbContext context) =>
             {
                 try
                 {
@@ -283,7 +283,7 @@ namespace PersonInterestsApi
             //LABB UPPGIFT Hämta alla intressen som är kopplade till en specifik person
             //GET one person with interests
             //---------------------------------------------------------------------------------------
-            app.MapGet("/person/interests/{id:int}", async (int id, AppDbContext context) =>
+            app.MapGet("/persons/interests/{id:int}", async (int id, AppDbContext context) =>
             {
 
                 var person = await context.Persons.FindAsync(id);
@@ -326,7 +326,7 @@ namespace PersonInterestsApi
             //LABB EXTRA Här skapar jag en ny person och ett nytt intresse till den personen på samma gång
             //
             //---------------------------------------------------------------------------------------
-            app.MapPost("person/interest", async (PersonWithInterestModel model, AppDbContext context) =>
+            app.MapPost("persons/interests", async (PersonWithInterestModel model, AppDbContext context) =>
             {
                 using var transaction = context.Database.BeginTransaction();
                 try
@@ -467,7 +467,7 @@ namespace PersonInterestsApi
 
             //LABB EXTRA Här får man söka efter ett namn eller bara en bokstav och får då ut alla personer som har det i PersonName sen visas alla deras 
             //intressen och länkar till dem intressena
-            app.MapGet("/searchForPerson/{name}/Info", async (string name, AppDbContext context) =>
+            app.MapGet("/searchForPerson/{name}/info", async (string name, AppDbContext context) =>
             {
                 var result = from p in context.Persons
                              where p.PersonName.Contains(name)
