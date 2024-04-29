@@ -36,7 +36,7 @@ There is also possible to add a new Person and Interest at the same time:
 #### /searchForPerson/{name}/info
 
 ### GET a paginated result based on what you want
-#### /persons/paginate?pageSize=1&pageNumber=10
+#### /persons/paginate?pageSize=10&pageNumber=1
 
 ### GET all persons with all there interest and links connected to those interests
 #### /allpersoninfo
